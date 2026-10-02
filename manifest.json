@@ -1,6 +1,9 @@
 {
   "short_name": "CheckListy",
   "name": "CheckListy - Seu conteúdo, em ordem",
+  "id": "/playtracker/",
+  "start_url": "./index.html",
+  "scope": "./",
   "icons": [
     {
       "src": "icon.png",
@@ -14,7 +17,6 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./index.html",
   "background_color": "#121212",
   "theme_color": "#121212",
   "display": "standalone"
