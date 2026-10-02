@@ -25,16 +25,27 @@ document.getElementById("btn-cancel-modal").addEventListener("click", () => moda
 document.getElementById("btn-save-playlist").addEventListener("click", handleAddPlaylist);
 
 // Event Listeners de Filtro
+// Configura os botões de filtro no topo com as cores correspondentes
 document.querySelectorAll(".filter-btn").forEach(btn => {
   btn.addEventListener("click", (e) => {
+    // Reseta todos os botões para o estilo neutro/inativo
     document.querySelectorAll(".filter-btn").forEach(b => {
-      b.classList.remove("bg-red-600", "text-white");
-      b.classList.add("bg-zinc-800", "text-zinc-400");
+      b.className = "filter-btn py-1.5 rounded-lg bg-zinc-800 text-zinc-400 font-medium text-center transition-all";
     });
-    e.target.classList.remove("bg-zinc-800", "text-zinc-400");
-    e.target.classList.add("bg-red-600", "text-white");
 
     currentFilter = e.target.dataset.filter;
+
+    // Aplica a cor específica para o filtro ativo
+    if (currentFilter === "all") {
+      e.target.className = "filter-btn py-1.5 rounded-lg bg-zinc-700 text-zinc-100 font-bold text-center shadow transition-all";
+    } else if (currentFilter === "watching") {
+      e.target.className = "filter-btn py-1.5 rounded-lg bg-amber-500 text-zinc-950 font-bold text-center shadow transition-all";
+    } else if (currentFilter === "unstarted") {
+      e.target.className = "filter-btn py-1.5 rounded-lg bg-red-600 text-white font-bold text-center shadow transition-all";
+    } else if (currentFilter === "completed") {
+      e.target.className = "filter-btn py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-center shadow transition-all";
+    }
+
     if (window.currentEpisodes) renderEpisodesFeed(window.currentEpisodes);
   });
 });
