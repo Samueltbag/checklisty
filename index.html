@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlayTracker</title>
+  <title>CheckListy - Seu conteúdo, em ordem</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#121212">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'><path d='M8 5v14l11-7z'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans pb-10">
@@ -14,9 +14,12 @@
   <!-- Header Fixo -->
   <header class="p-4 bg-zinc-900 border-b border-zinc-800 sticky top-0 z-10 shadow-lg space-y-3">
     <div class="flex justify-between items-center max-w-md mx-auto">
-      <div class="flex items-center gap-2 cursor-pointer" id="btn-home">
-        <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center font-bold text-white text-lg shadow">▶</div>
-        <h1 class="text-lg font-bold text-white tracking-tight">Play<span class="text-red-500">Tracker</span></h1>
+      <div class="flex flex-col cursor-pointer" id="btn-home">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center font-bold text-white text-base shadow">✓</div>
+          <h1 class="text-lg font-bold text-white tracking-tight">Check<span class="text-red-500">Listy</span></h1>
+        </div>
+        <span class="text-[10px] text-zinc-400 font-normal pl-9 -mt-1">Seu conteúdo, em ordem.</span>
       </div>
       <button id="btn-add-modal" class="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold flex items-center gap-1">
         <span>+</span> Playlist
