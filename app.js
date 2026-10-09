@@ -1,5 +1,5 @@
 // Configuração Centralizada
-const DEFAULT_API_KEY = "SUA_API_KEY_DO_GOOGLE_CLOUD_AQUI"; 
+const DEFAULT_API_KEY = "AIzaSyBSukspcDYg2qXlLdsIbAgsBWCyNkwoRBw"; 
 const STORAGE_KEY_PLAYLISTS = "checklisty_playlists";
 const STORAGE_KEY_STATUS = "checklisty_status_map";
 
