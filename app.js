@@ -71,22 +71,27 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
 function parseYouTubeInput(input) {
   const cleanInput = input.trim();
 
+  // 1. PRIMEIRA PRIORIDADE: Verifica se há parâmetro 'list=' na URL (mesmo se tiver '@' no link)
   const listMatch = cleanInput.match(/[&?]list=([^&]+)/i);
   if (listMatch) {
     return { type: "playlist", id: listMatch[1] };
   }
 
-  const handleMatch = cleanInput.match(/(?:youtube\.com\/|@)([\w.-]+)/i);
-  if (cleanInput.includes("@") && handleMatch) {
-    const handle = handleMatch[1].startsWith("@") ? handleMatch[1] : `@${handleMatch[1]}`;
-    return { type: "handle", value: handle };
+  // 2. SEGUNDA PRIORIDADE: Caso seja um link de canal com @handle (ex: youtube.com/@CanalExemplo)
+  if (cleanInput.includes("@")) {
+    const handleMatch = cleanInput.match(/@([\w.-]+)/i);
+    if (handleMatch) {
+      return { type: "handle", value: `@${handleMatch[1]}` };
+    }
   }
 
+  // 3. TERCEIRA PRIORIDADE: Caso seja link com ID direto de canal (ex: youtube.com/channel/UC...)
   const channelMatch = cleanInput.match(/youtube\.com\/channel\/([\w-]+)/i);
   if (channelMatch) {
     return { type: "channelId", value: channelMatch[1] };
   }
 
+  // Fallback: considera o próprio texto digitado como ID de playlist
   return { type: "playlist", id: cleanInput };
 }
 
