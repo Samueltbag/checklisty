@@ -18,11 +18,31 @@ const filterBar = document.getElementById("filter-bar");
 const modalAdd = document.getElementById("modal-add");
 
 // Event Listeners Nativos
-document.getElementById("btn-home").addEventListener("click", showHome);
-document.getElementById("btn-back").addEventListener("click", showHome);
+document.getElementById("btn-home").addEventListener("click", () => handleBackNavigation());
+document.getElementById("btn-back").addEventListener("click", () => handleBackNavigation());
 document.getElementById("btn-add-modal").addEventListener("click", () => modalAdd.classList.remove("hidden"));
 document.getElementById("btn-cancel-modal").addEventListener("click", () => modalAdd.classList.add("hidden"));
 document.getElementById("btn-save-playlist").addEventListener("click", handleAddPlaylist);
+
+// Integração com o Botão / Gesto Voltar do Android (History API)
+window.addEventListener("popstate", (event) => {
+  if (event.state && event.state.view === "episodes") {
+    // Se o estado for de episódios (ex: ao avançar)
+    const playlist = playlists.find(p => p.id === event.state.playlistId);
+    if (playlist) renderEpisodesUI(playlist);
+  } else {
+    // Voltar para a Home
+    renderHomeUI();
+  }
+});
+
+function handleBackNavigation() {
+  if (!viewEpisodes.classList.contains("hidden")) {
+    history.back(); // Dispara o retorno no histórico nativo
+  } else {
+    renderHomeUI();
+  }
+}
 
 // Event Listeners de Filtro
 document.querySelectorAll(".filter-btn").forEach(btn => {
@@ -47,35 +67,31 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
   });
 });
 
-// Extrai ID de Playlist ou Identificador de Canal da URL colada pelo usuário
+// Extrai ID de Playlist ou Identificador de Canal da URL
 function parseYouTubeInput(input) {
   const cleanInput = input.trim();
 
-  // 1. Caso seja link de Playlist tradicional (list=...)
   const listMatch = cleanInput.match(/[&?]list=([^&]+)/i);
   if (listMatch) {
     return { type: "playlist", id: listMatch[1] };
   }
 
-  // 2. Caso seja um @handle de canal (ex: youtube.com/@CanalExemplo)
   const handleMatch = cleanInput.match(/(?:youtube\.com\/|@)([\w.-]+)/i);
   if (cleanInput.includes("@") && handleMatch) {
     const handle = handleMatch[1].startsWith("@") ? handleMatch[1] : `@${handleMatch[1]}`;
     return { type: "handle", value: handle };
   }
 
-  // 3. Caso seja link com ID direto de canal (ex: youtube.com/channel/UC...)
   const channelMatch = cleanInput.match(/youtube\.com\/channel\/([\w-]+)/i);
   if (channelMatch) {
     return { type: "channelId", value: channelMatch[1] };
   }
 
-  // Fallback: considera o próprio texto digitado como ID de playlist
   return { type: "playlist", id: cleanInput };
 }
 
-// Navegação entre Telas
-function showHome() {
+// Alternância de Telas (UI)
+function renderHomeUI() {
   activePlaylistId = null;
   viewPlaylists.classList.remove("hidden");
   viewEpisodes.classList.add("hidden");
@@ -84,7 +100,7 @@ function showHome() {
   renderPlaylistsHome();
 }
 
-function showEpisodesView(playlist) {
+function renderEpisodesUI(playlist) {
   activePlaylistId = playlist.id;
   document.getElementById("playlist-title-header").innerText = playlist.title;
   viewPlaylists.classList.add("hidden");
@@ -94,7 +110,13 @@ function showEpisodesView(playlist) {
   fetchEpisodesForPlaylist(playlist.id);
 }
 
-// Lógica para Adicionar Playlist ou Canal
+function showEpisodesView(playlist) {
+  // Adiciona entrada no histórico do navegador para o botão voltar do Android funcionar
+  history.pushState({ view: "episodes", playlistId: playlist.id }, "", `#playlist-${playlist.id}`);
+  renderEpisodesUI(playlist);
+}
+
+// Adicionar Playlist ou Canal
 async function handleAddPlaylist() {
   const input = document.getElementById("input-playlist-url");
   const rawValue = input.value;
@@ -112,8 +134,6 @@ async function handleAddPlaylist() {
   try {
     if (parsed.type === "playlist") {
       playlistId = parsed.id;
-
-      // Busca dados da playlist diretamente
       const url = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${DEFAULT_API_KEY}`;
       const res = await fetch(url);
       const data = await res.json();
@@ -123,7 +143,6 @@ async function handleAddPlaylist() {
         thumb = data.items[0].snippet.thumbnails.medium?.url || thumb;
       }
     } else {
-      // Se for canal (@handle ou channelId), busca a playlist oculta de uploads
       let channelUrl = "";
       if (parsed.type === "handle") {
         channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&forHandle=${encodeURIComponent(parsed.value)}&key=${DEFAULT_API_KEY}`;
@@ -140,7 +159,6 @@ async function handleAddPlaylist() {
       }
 
       const channelItem = data.items[0];
-      // A playlist oculta com todos os vídeos enviados pelo canal fica em relatedPlaylists.uploads
       playlistId = channelItem.contentDetails.relatedPlaylists.uploads;
       title = `${channelItem.snippet.title} (Vídeos do Canal)`;
       thumb = channelItem.snippet.thumbnails.medium?.url || thumb;
@@ -151,7 +169,6 @@ async function handleAddPlaylist() {
       return;
     }
 
-    // Verifica se já existe na coleção do usuário
     if (playlists.some(p => p.id === playlistId)) {
       alert("Esta playlist ou canal já está na sua coleção!");
       return;
@@ -170,7 +187,7 @@ async function handleAddPlaylist() {
   }
 }
 
-// Deleta Playlist
+// Eliminar Playlist
 function deletePlaylist(playlistId, e) {
   e.stopPropagation();
   if (confirm("Deseja remover esta coleção?")) {
@@ -180,7 +197,7 @@ function deletePlaylist(playlistId, e) {
   }
 }
 
-// Renderiza a Home de Coleções
+// Renderiza a Home
 function renderPlaylistsHome() {
   playlistCardsContainer.innerHTML = "";
 
@@ -215,7 +232,7 @@ function renderPlaylistsHome() {
   });
 }
 
-// Alterna o status do episódio em ciclo (Não iniciado -> Assistindo -> Concluído)
+// Alterna o status do episódio
 function cycleStatus(videoId) {
   const current = statusMap[videoId];
   if (!current) {
@@ -230,7 +247,7 @@ function cycleStatus(videoId) {
   if (window.currentEpisodes) renderEpisodesFeed(window.currentEpisodes);
 }
 
-// Busca Episódios da Playlist Selecionada
+// Busca Episódios
 async function fetchEpisodesForPlaylist(playlistId) {
   statsContainer.innerText = "Buscando episódios do YouTube...";
 
@@ -270,7 +287,7 @@ async function fetchEpisodesForPlaylist(playlistId) {
   }
 }
 
-// Renderiza os episódios com Filtros e Estilos
+// Renderiza Episódios
 function renderEpisodesFeed(episodes) {
   const completedCount = episodes.filter(ep => statusMap[ep.id] === "completed").length;
   const watchingCount = episodes.filter(ep => statusMap[ep.id] === "watching").length;
@@ -332,4 +349,4 @@ function renderEpisodesFeed(episodes) {
 }
 
 // Inicialização
-renderPlaylistsHome();
+renderHomeUI();
