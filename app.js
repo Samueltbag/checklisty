@@ -226,7 +226,7 @@ function renderPlaylistsHome() {
         <img src="${p.thumb}" class="w-full h-full object-cover">
       </div>
       <div class="flex-grow min-w-0">
-        <h3 class="text-xs sm:text-sm font-bold text-zinc-100 truncate">${p.title}</h3>
+        <h3 class="text-xs sm:text-sm font-bold text-zinc-100 leading-snug break-words">${p.title}</h3>
         <p class="text-[11px] text-zinc-400 mt-0.5">Toque para ver episódios</p>
       </div>
       <button onclick="deletePlaylist('${p.id}', event)" class="px-2.5 py-2 text-xs text-zinc-500 hover:text-red-400 hover:bg-zinc-800 rounded-lg transition-colors">
